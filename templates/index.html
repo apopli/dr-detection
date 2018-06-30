@@ -1,0 +1,242 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+
+{% load static %}
+
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<style>
+
+    .thumbnail {
+
+        height: 100px;
+        margin: 10px;
+        float: left;
+    }
+
+    .jumbotron {
+        background-image: url("https://ak3.picdn.net/shutterstock/videos/10894253/thumb/1.jpg");
+        background-size: cover;
+        background-repeat: no-repeat;
+        text-align: center;
+        color: white;
+        text-shadow: black 0.3em 0.3em 0.3em;
+    }
+
+    body {
+        background: url("https://www.toptal.com/designers/subtlepatterns/patterns/sayagata-400px.png") repeat;
+    }
+
+    #result {
+        border: 4px dotted #cccccc;
+        display: none;
+        margin: 0 auto;
+        width: 511px;
+    }
+
+    .two_image {
+        width: 90%;
+        margin-left: auto;
+        margin-right: auto;
+        padding-top: 50px;
+        padding-bottom: 50px;
+        overflow: hidden;
+    }
+    .button_box {
+        width: 30%;
+        margin-left: auto;
+        margin-right: auto;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        overflow: hidden;
+    }
+
+    .left_image {
+        width: 715px;
+        height: 475px;
+        float: left;
+        overflow: hidden;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .left_button {
+        width: 150px;
+        float: left;
+        overflow: hidden;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .right_image {
+        width: 715px;
+        height: 475px;
+        float: right;
+        overflow: hidden;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .right_button {
+        width: 150px;
+        float: right;
+        overflow: hidden;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .out_image {
+        width: inherit;
+        height: inherit;
+    }
+</style>
+
+
+<script type="text/javascript">
+
+    window.onload = function () {
+        //Check File API support
+        if (window.File && window.FileList && window.FileReader) {
+            $('#files').on("change", null, function (event) {
+                var files = event.target.files; //FileList object
+                $("#predictions").hide();
+                var output = document.getElementById("result");
+                for (var i = 0; i < files.length; i++) {
+                    var file = files[i];
+                    //Only pics
+                    // if(!file.type.match('image'))
+                    if (file.type.match('image.*')) {
+                        if (this.files[0].size < 2097152) {
+                            // continue;
+                            var picReader = new FileReader();
+                            picReader.addEventListener("load", function (event) {
+                                var picFile = event.target;
+                                var div = document.createElement("div");
+                                div.innerHTML = "<img class='thumbnail' src='" + picFile.result + "'" +
+                                    "title='preview image'/>";
+                                output.insertBefore(div, null);
+                            });
+                            //Read the image
+                            $('#result').show();
+                            picReader.readAsDataURL(file);
+                        } else {
+                            alert("Image Size is too big. Maximum size is 2MB.");
+                            $(this).val("");
+                        }
+                    } else {
+                        alert("You can only upload image file.");
+                        $(this).val("");
+                    }
+                }
+
+            });
+        }
+        else {
+            console.log("Your browser does not support File API");
+        }
+    };
+
+    $('#files').click(function () {
+        $('.thumbnail').parent().remove();
+        $('result').hide();
+        $(this).val("");
+    });
+
+    function show_loading() {
+        document.getElementById("loading").style.display = "block";
+    }
+
+</script>
+
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <title>Diabetic Retinopathy Detection</title>
+</head>
+<body>
+
+<div class="jumbotron"><h2>Diabetic Retinopathy Clinical Support Assistant</h2></div>
+<div style="text-align: center">
+    <form id="upload_form" method="post" class="center" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="btn-group-vertical">
+            <label for="files">Upload images here:</label>
+            <input id="files" type="file" multiple name="images"/>
+            <br>
+        </div>
+        <div>
+            <output id="result"><br></output>
+        </div>
+        <button name="upload" type="submit" class="btn btn-info center" value="Submit" onclick="show_loading()">
+            Upload
+        </button>
+        <div>
+            <div class="button_box">
+                <button name="convert_ma" type="submit" class="btn btn-info center left_button" value="Submit" onclick="show_loading()">
+                    Microaneurysms
+                </button>
+                <button name="convert_he" type="submit" class="btn btn-info center right_button" value="Submit" onclick="show_loading()">
+                    Hemorrhage
+                </button>
+            </div>
+            <div class="button_box">
+                <button name="convert_se" type="submit" class="btn btn-info center left_button" value="Submit" onclick="show_loading()">
+                    Soft Exudates
+                </button>
+                <button name="convert_ex" type="submit" class="btn btn-info center right_button" value="Submit" onclick="show_loading()">
+                    Hard Exudates
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <div id="loading" class="btn-group-vertical" style="display: none;">
+        <img src="https://loading.io/spinners/microsoft/lg.rotating-balls-spinner.gif" style="margin: 10px" height="80">
+        <div>Please wait while we run our tests....</div>
+    </div>
+    <div id="predictions">
+        </br>
+        {% if status == 'uploaded' %}
+            <p>Disease Severity Level: Grade - {{ preds }}</p>
+            <p><b>Segmentation results:</b></p>
+        {% elif status == "converting" %}
+            <p>Disease Severity Level: Grade - {{ preds }}</p>
+            <p><b>Segmentation results:</b></p>
+        {% elif status == "no_image" %}
+            <p>No image selected</p>
+        {% endif %}
+    </div>
+    <div id="img_predictions">
+        {% if status == 'uploaded' %}
+        {% elif status == "converting" %}
+            <div class="two_image">
+                <div class="left_image"><img src="{% static 'images/predicted_ma.jpg' %}" alt="" style="max-width: 100%; height: auto;" /></div>
+                <div class="right_image"><img src="{% static 'images/predicted_he.jpg' %}" alt="" style="max-width: 100%; height: auto;" /></div>
+            </div>
+            <div class="two_image">            
+                <div class="left_image"><img src="{% static 'images/predicted_se.jpg' %}" alt="" style="max-width: 100%; height: auto;" /></div>
+                <div class="right_image"><img src="{% static 'images/predicted_ex.jpg' %}" alt="" style="max-width: 100%; height: auto;" /></div>            
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+</body>
+</html>
